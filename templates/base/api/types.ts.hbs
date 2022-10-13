@@ -412,6 +412,7 @@ export function encodeStateSnapshot(x: {{userState}}) {
   {{/with}}
   return buf.toBuffer();
 }
+{{#if events}}
 function encodeEvent(buf: _Writer, event: _EventMessage) {
   buf.writeUVarint(event.event);
   switch (event.event) {
@@ -437,6 +438,7 @@ function decodeEvent(sb: _Reader): HathoraEvents {
       throw new Error("Unknown event type");
   }
 }
+{{/if}}
 export function encodeStateUpdate(
   x: _DeepPartial<{{userState}}> | undefined,
   changedAtDiff: number,
@@ -451,9 +453,11 @@ export function encodeStateUpdate(
     buf.writeUInt32(Number(msgId));
     writeOptional(buf, response.type === "error" ? response.error : undefined, (x) => {{> renderEncodeArg error}});
   });
+	{{#if events}}
   const events = messages.flatMap((msg) => (msg.type === "event" ? msg : []));
   buf.writeUVarint(events.length);
   events.forEach((message) => encodeEvent(buf, message));
+	{{/if}}
   if (x !== undefined) {
     {{#with (lookup types userState)}}{{> renderEncodeDiffArg}};{{/with}}
   }
@@ -477,9 +481,11 @@ export function decodeStateUpdate(buf: ArrayBufferView | _Reader): {
     const maybeError = parseOptional(sb, () => {{> renderDecodeArg error}});
     return _Message.response(msgId, maybeError === undefined ? _Response.ok() : _Response.error(maybeError));
   });
+	{{#if events}}
   const events = [...Array(sb.readUVarint())].map(() => decodeEvent(sb));
+	{{/if}}
   const stateDiff = sb.remaining() ? {{#with (lookup types userState)}}{{> renderDecodeDiffArg}}{{/with}} : undefined;
-  return { stateDiff, changedAtDiff, responses, events };
+  return { stateDiff, changedAtDiff, responses, {{#if events}}events{{else}}events: []{{/if}} };
 }
 export function decodeStateSnapshot(buf: ArrayBufferView | _Reader) {
   const sb = ArrayBuffer.isView(buf) ? new _Reader(buf) : buf;

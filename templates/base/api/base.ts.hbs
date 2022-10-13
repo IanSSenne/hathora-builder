@@ -28,18 +28,18 @@ export const Response: { ok: () => OkResponse; error: (error: {{> renderTypeArg 
 };
 
 export type ResponseMessage = { type: "response"; msgId: number; response: Response };
-export type EventMessage = {
+export type EventMessage = {{#if events}}{
   type: "event";
   event: T.HathoraEventTypes;
   data: T.HathoraEventPayloads[T.HathoraEventTypes];
-};
+};{{else}}never;{{/if}}
 export type Message = ResponseMessage | EventMessage;
 export const Message: {
-  response: (msgId: number, response: Response) => ResponseMessage;
-  event: (event: T.HathoraEventTypes, data: T.HathoraEventPayloads[T.HathoraEventTypes]) => EventMessage;
+  response: (msgId: number, response: Response) => ResponseMessage;{{#if events}}
+  event: (event: T.HathoraEventTypes, data: T.HathoraEventPayloads[T.HathoraEventTypes]) => EventMessage;{{/if}}
 } = {
-  response: (msgId, response) => ({ type: "response", msgId, response }),
-  event: (event, data) => ({ type: "event", event, data }),
+  response: (msgId, response) => ({ type: "response", msgId, response }),{{#if events}}
+  event: (event, data) => ({ type: "event", event, data }),{{/if}}
 };
 
 {{#each auth}}
