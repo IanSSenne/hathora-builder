@@ -453,11 +453,11 @@ export function encodeStateUpdate(
     buf.writeUInt32(Number(msgId));
     writeOptional(buf, response.type === "error" ? response.error : undefined, (x) => {{> renderEncodeArg error}});
   });
-	{{#if events}}
+  {{#if events}}
   const events = messages.flatMap((msg) => (msg.type === "event" ? msg : []));
   buf.writeUVarint(events.length);
   events.forEach((message) => encodeEvent(buf, message));
-	{{/if}}
+  {{/if}}
   if (x !== undefined) {
     {{#with (lookup types userState)}}{{> renderEncodeDiffArg}};{{/with}}
   }
@@ -481,9 +481,9 @@ export function decodeStateUpdate(buf: ArrayBufferView | _Reader): {
     const maybeError = parseOptional(sb, () => {{> renderDecodeArg error}});
     return _Message.response(msgId, maybeError === undefined ? _Response.ok() : _Response.error(maybeError));
   });
-	{{#if events}}
+  {{#if events}}
   const events = [...Array(sb.readUVarint())].map(() => decodeEvent(sb));
-	{{/if}}
+  {{/if}}
   const stateDiff = sb.remaining() ? {{#with (lookup types userState)}}{{> renderDecodeDiffArg}}{{/with}} : undefined;
   return { stateDiff, changedAtDiff, responses, {{#if events}}events{{else}}events: []{{/if}} };
 }

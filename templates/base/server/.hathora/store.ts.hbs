@@ -257,7 +257,7 @@ function ctx(chance: Chance.Chance, time: number, stateId: RoomId): Context {
       data: HathoraEventPayloads[EventType],
       userId: UserId
     ) {
-			{{#if events}}
+      {{#if events}}
       const userInfo = stateInfo.get(stateId)?.subscriptions.get(userId);
       if (userInfo !== undefined) {
         userInfo.messages.push(Message.event(event, data));
@@ -265,7 +265,7 @@ function ctx(chance: Chance.Chance, time: number, stateId: RoomId): Context {
           addPendingMessage(stateId, userId);
         }
       }
-			{{/if}}
+      {{/if}}
     },
     broadcastEvent<EventType extends HathoraEventTypes>(event: EventType, data: HathoraEventPayloads[EventType]) {
       if (stateInfo.has(stateId)) {
