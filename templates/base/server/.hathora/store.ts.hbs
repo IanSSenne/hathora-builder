@@ -13,8 +13,8 @@ import {
   encodeStateUpdate,
   {{userState}} as UserState,
   encodeStateError,
-  HathoraEventTypes,
-  HathoraEventPayloads,
+  {{#if events}}HathoraEventTypes,
+  HathoraEventPayloads,{{/if}}
 } from "../../api/types";
 import { ImplWrapper } from "./wrapper";
 import { computeDiff } from "./diff";
@@ -251,13 +251,12 @@ function sendMessages(stateId: RoomId, userId: UserId) {
 function ctx(chance: Chance.Chance, time: number, stateId: RoomId): Context {
   return {
     chance,
-    time,
+    time,{{#if events}}
     sendEvent<EventType extends HathoraEventTypes>(
       event: EventType,
       data: HathoraEventPayloads[EventType],
       userId: UserId
     ) {
-      {{#if events}}
       const userInfo = stateInfo.get(stateId)?.subscriptions.get(userId);
       if (userInfo !== undefined) {
         userInfo.messages.push(Message.event(event, data));
@@ -265,7 +264,6 @@ function ctx(chance: Chance.Chance, time: number, stateId: RoomId): Context {
           addPendingMessage(stateId, userId);
         }
       }
-      {{/if}}
     },
     broadcastEvent<EventType extends HathoraEventTypes>(event: EventType, data: HathoraEventPayloads[EventType]) {
       if (stateInfo.has(stateId)) {
@@ -276,12 +274,12 @@ function ctx(chance: Chance.Chance, time: number, stateId: RoomId): Context {
           }
         }
       }
-    },
+    },{{/if}}
   };
 }
 
 function ctxNoEvents(chance: Chance.Chance, time: number): Context {
-  return { chance, time, sendEvent() {}, broadcastEvent() {} };
+  return { chance, time{{#if events}}, sendEvent() {}, broadcastEvent() {}{{/if}} };
 }
 
 function addPendingMessage(stateId: RoomId, userId: UserId) {

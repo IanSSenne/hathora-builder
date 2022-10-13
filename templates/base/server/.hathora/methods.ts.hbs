@@ -7,14 +7,14 @@ import {
   {{#each methods}}
   {{makeRequestName @key}},
   {{/each}}
-  HathoraEventTypes,
-  HathoraEventPayloads,
+{{#if events}}  HathoraEventTypes,
+  HathoraEventPayloads,{{/if}}
 } from "../../api/types";
 
 export interface Context {
   chance: ReturnType<typeof Chance>;
   time: number;
-  sendEvent: <EventType extends HathoraEventTypes>(
+  {{#if events}}sendEvent: <EventType extends HathoraEventTypes>(
     event: EventType,
     data: HathoraEventPayloads[EventType],
     to: UserId
@@ -22,7 +22,7 @@ export interface Context {
   broadcastEvent: <EventType extends HathoraEventTypes>(
     event: EventType,
     data: HathoraEventPayloads[EventType]
-  ) => void;
+  ) => void;{{else}}{{/if}}
 }
 export interface Methods<T> {
   initialize(ctx: Context, request: IInitializeRequest): T;
